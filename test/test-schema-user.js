@@ -30,8 +30,8 @@ before((done) => {
 
 // After all tests are run: cleanup!
 
-after(() => {
-	
+after((done) => {
+
 	var cleanupPromises = [
 		User.find({"user" : "testUserCreation"}).remove().exec(),
 		User.find({"user" : "testUserPwdHash"}).remove().exec()
@@ -39,14 +39,14 @@ after(() => {
 
 	// Promise.all these
 	Promise.all(cleanupPromises).then(
-		(meta) => { done() },
-		(err) => { 
+		(meta) => {
+			dbService.disconnect();
+			done();
+		}, (err) => {
 			console.log('Error: ' + err);
-			done(err);
+			dbService.disconnect();			// Jem sez: Don't overlook closing DB connection!
+			done();
 		});
-
-	// Jem sez: Don't overlook closing DB connection!
-    dbService.disconnect();
 });
 
 
@@ -248,35 +248,36 @@ describe('DB Schema: User', () => {
 					// Incrase complexity (y-2)
 					cfgHash.year--;
 					
-					done();
-					
 					// Push operation shouldn't go through the "save process" (involving preSave hook)
-					User.updateOne({user: 'testUserPwdHash'}, {$pushAll: {roles:['bear-rider']}}, {upsert:true}, (err, nonUpdatedUser) => {
-						
-						var nonUpdated = nonUpdatedUser.pwd.split(':');
-						
-						assert(parseInt(nonUpdated[0]) === parseInt(updated[0]), "iteration count must be similar - update via db push");
-						assert(nonUpdated[1] === updated[1], "salt has not been regenerated");
-						assert(nonUpdated[2] === updated[2], "hash is identical");
-						
-						// There should be no error
-						should.equal(err, null);
-						
-						// Reset complexity (to y-1)
-						cfgHash.year++;
-						
-						aUser.save((err, lastUpdatedUser) => {
+					User.updateOne({user: 'testUserPwdHash'}, {$pushAll: {roles:['bear-rider']}}, {upsert:true}, (err, meta) => {
+
+						User.findOne({user: 'testUserPwdHash'}, 'pwd', (err, nonUpdatedUser) => {
+														
+							var nonUpdated = nonUpdatedUser.pwd.split(':');
 							
-							var lastUpdated = lastUpdatedUser.pwd.split(':');
+							assert(parseInt(nonUpdated[0]) === parseInt(updated[0]), "iteration count must be similar - update via db push");
+							assert(nonUpdated[1] === updated[1], "salt has not been regenerated");
+							assert(nonUpdated[2] === updated[2], "hash is identical");
 							
-							assert(parseInt(nonUpdated[0]) === parseInt(lastUpdated[0]), "iteration count is similar, complexity was already y-1");
-							assert(nonUpdated[1] === lastUpdated[1], "salt has not been regenerated");
-							assert(nonUpdated[2] === lastUpdated[2], "hash is identical");
+							// There should be no error
+							should.equal(err, null);
 							
-							// Reset complexity (y0)							
-							assert(originalYear === ++cfgHash.year, "year has been restored");
+							// Reset complexity (to y-1)
+							cfgHash.year++;
 							
-							done();		// This - is - Sparta!
+							aUser.save((err, lastUpdatedUser) => {
+								
+								var lastUpdated = lastUpdatedUser.pwd.split(':');
+								
+								assert(parseInt(nonUpdated[0]) === parseInt(lastUpdated[0]), "iteration count is similar, complexity was already y-1");
+								assert(nonUpdated[1] === lastUpdated[1], "salt has not been regenerated");
+								assert(nonUpdated[2] === lastUpdated[2], "hash is identical");
+								
+								// Reset complexity (y0)							
+								assert(originalYear === ++cfgHash.year, "year has been restored");
+								
+								done();		// This - is - Sparta!
+							});
 						});
 					});
 				});				

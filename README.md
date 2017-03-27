@@ -1,5 +1,5 @@
 # Dercetech Authentication Microservice
-Written by Jérémie Mercier (Jem), absed on the best practices detailed in Sophos guidelines:
+Written by Jérémie Mercier (Jem), based on the best practices detailed in Sophos guidelines:
 https://nakedsecurity.sophos.com/2013/11/20/serious-security-how-to-store-your-users-passwords-safely/
 
 Using Trapezo dependency injection library (also written by Jérémie Mercier, yay).
