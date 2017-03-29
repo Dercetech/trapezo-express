@@ -1,9 +1,12 @@
 'use strict';
 module.exports = function configure(injector) {
 
-	// Routes of the API
+	// Routes of the application
 	injector.register('configureRoutes', require('./routes'));
 
-	// Route: 404
-	injector.register('use404Route', require('./handlers/use-404-route'));
+	// API route
+    injector.register('apiRoute', require('./api-route'));
+	
+	// 404 handler
+	injector.register('fourOhFourHandler', require('./handlers/404-handler'));
 };

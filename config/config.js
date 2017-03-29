@@ -1,10 +1,10 @@
 'use strict';
 module.exports = function configFactory(){
 
-    var path    = require('path');
+    let path    = require('path');
 
 	// Environment
-	var environment = process.env.NODE_ENV ? process.env.NODE_ENV : 'prod';
+	let environment = process.env.NODE_ENV ? process.env.NODE_ENV : 'prod';
 	
     //////////////////////////////////////////
     // Server configuration //////////////////
@@ -12,10 +12,10 @@ module.exports = function configFactory(){
     // 1. Server configuration ///////////////
     
 	// Port
-	var port = process.env.PORT || 8086;
+	let port = process.env.PORT || 8086;
 
 	// Address
-	var address = process.env.IP || "127.0.0.1";
+	let address = process.env.IP || "127.0.0.1";
     
     
     // 1.1 Special environment: Openshift ////
@@ -29,7 +29,7 @@ module.exports = function configFactory(){
     // 2. Database configuration /////////////
     
     // MongoDB
-    var dbUrl = null;
+    let dbUrl = null;
 	switch(environment){
 		case "dev"	: dbUrl = process.env.CFG_MDB; break;
 		case "test"	: dbUrl = process.env.CFG_MDB_TEST; break;
@@ -44,14 +44,14 @@ module.exports = function configFactory(){
     // 3. Variables //////////////////////////
     
 		// Token auth secret
-		var tokenSecret = process.env.CFG_PWD;
+		let tokenSecret = process.env.CFG_PWD;
 		if(!tokenSecret){
 			console.log('Config error: Environment variable CFG_PWD not set.');
 		}
 
 
     // 4. File system ////////////////////////
-    var dataFolder      = path.join(__dirname.replace("config", ""), "data");
+    let dataFolder      = path.join(__dirname.replace("config", ""), "data");
     
     // 4.1 Special environment: Openshift
     if(process.env.OPENSHIFT_DATA_DIR){
@@ -59,7 +59,7 @@ module.exports = function configFactory(){
     }
     
     // 4.2 Set folders
-    //var someFolder = path.join(dataFolder, "submissions");    
+    //let someFolder = path.join(dataFolder, "submissions");    
 
 
     // Server configuration //////////////////
@@ -86,8 +86,10 @@ module.exports = function configFactory(){
 		
 		"security" : {
 			
-			// Secret used when generating JOTs
-			"tokenSecret"	: tokenSecret,
+			"jot"	: {
+				"tokenSecret"	: tokenSecret,	// Secret used when generating JOTs
+				"expiration"	: 60 * 60 * 24	// 24h expiry time
+			},
 			
 			// Hashing algorithms configuration
 			"hashing" : {

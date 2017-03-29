@@ -10,10 +10,10 @@ module.exports = function(
 	//////////////////////////////////////////////
 	// Server configuration //////////////////////
 
-	var express     = require('express');       //
-	var app         = express();                //
-	//var morgan      = require('morgan');      //
-	var path        = require('path');          //
+	let express     = require('express');       //
+	let app         = express();                //
+	//let morgan      = require('morgan');      //
+	let path        = require('path');          //
 
 
     // Express setup (includes header config & CORS)
@@ -23,7 +23,7 @@ module.exports = function(
     //app.use(morgan('dev'));
 
     // Database setup
-    var dbService = dbServiceAutoConnect;
+    let dbService = dbServiceAutoConnect;
     /*dbService.connect(() => { });*/
 
     // Routes setup
@@ -38,17 +38,20 @@ module.exports = function(
 
 	// Start HTTP server (Express shorthand)
 
-    var httpServer = null;
+    let httpServer = null;
 
-	var facade = {
+	let facade = {
 	    start           : start,
 	    getHttpServer   : getHttpServer,
 	    stop            : stop
 	}
 
-    function start(onReady){
-        if(dbService.status !== 1) throw { name: "databaseNotAvailable", message: "Database unavailable - server will not start" };
-        if(false) {} else httpServer = app.listen(config.server.port, config.server.address, onReady);
+    function start(){
+		
+		return new Promise( (resolve, reject) => {
+			if(dbService.status !== 1) throw { name: "databaseNotAvailable", message: "Database unavailable - server will not start" };
+			if(false) {} else httpServer = app.listen(config.server.port, config.server.address, () => resolve(httpServer));
+		});
     }
 
 	function getHttpServer(){

@@ -1,15 +1,16 @@
 'use strict';
 module.exports = function configureRoutesFactory(
-		use404Route
+		apiRoute,
+		fourOhFourHandler
 	){
 
-    var express     = require('express');
-    var path        = require('path');
+    let express     = require('express');
+    let path        = require('path');
 
     function configureRoutes(expressApp){
 
 		// Static content - should upgrade Trapezo to provide true server root
-		var pathToSite = path.join(__dirname, '..', '..', 'public', 'www');
+		let pathToSite = path.join(__dirname, '..', '..', 'public', 'www');
 		expressApp.use(/*"/",*/express.static(pathToSite));
 
 		// Init the app
@@ -17,11 +18,11 @@ module.exports = function configureRoutesFactory(
 			res.send("Hello, curious one!");
 		});*/
 
-	    // Api
-	    //expressApp.use('/api', apiRoute);
+	    // API
+	    expressApp.use('/api', apiRoute);
 
 		// Finally, default to 404
-		use404Route(expressApp);
+		expressApp.use(fourOhFourHandler);
     }
 
     return configureRoutes;

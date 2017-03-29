@@ -21,13 +21,10 @@
 require('trapezo').resolve(module, function(main){
 
     // Start server
-    main.start(function onReady(){
-
-		// Express HTTP server
-        var httpServer = main.getHttpServer();
+    main.start().then( (httpServer) => {
 		
 		// Get version from package.json
-		var version = process.env && process.env.npm_package_version;
+		let version = process.env && process.env.npm_package_version;
 	    
 		// Display running version
 		if(version) console.log("Dercetech Authentication µService ready (v" + version + ")");

@@ -1,287 +1,203 @@
 "use strict";
 
 // Requires
-var mongoose    = require("mongoose");
-var Promise		= require("bluebird");
+let Promise		= require('bluebird');
+let chai 		= require("chai");
+let chaiHttp 	= require("chai-http");
+let should 		= chai.should();
+let assert		= chai.assert;
 
-var chai 		= require("chai");
-var chaiHttp 	= require("chai-http");
-var should 		= chai.should();
-var assert		= chai.assert;
-
-var cfg, cfgHash, dbService, User;
-
-// Before all tests in this file
-before((done) => {
-
-	// Set environment to TEST
-	process.env.NODE_ENV = "test";
-
-    require("trapezo").resolve(module, function(config, dbServiceAutoConnect, UserSchema) {
-		cfg = config;
-		cfgHash = config.security.hashing.PBKDF2;
-		dbService = dbServiceAutoConnect;	// DB connection is ready before dependencies resolution
-		User = UserSchema;
-		
-		// Start testing
-		done();
-    });
-});
-
-// After all tests are run: cleanup!
-
-after((done) => {
-
-	var cleanupPromises = [
-		User.find({"user" : "testUserCreation"}).remove().exec(),
-		User.find({"user" : "testUserPwdHash"}).remove().exec()
-	];
-
-	// Promise.all these
-	Promise.all(cleanupPromises).then(
-		(meta) => {
-			dbService.disconnect();
-			done();
-		}, (err) => {
-			console.log('Error: ' + err);
-			dbService.disconnect();			// Jem sez: Don't overlook closing DB connection!
-			done();
-		});
-});
-
-
-// Actual tests //////////////////////////////
 
 describe('DB Schema: User', () => {
+	
+	let cfg, cfgHash, dbService, mongoose, User;
+	let originalYear;
+	
+	process.env.NODE_ENV = "test";
+	
+	before(done => {
+		require("trapezo").resolve(module, function (config, dbServiceAutoConnect, UserSchema) {
+			cfg = config;
+			cfgHash = config.security.hashing.PBKDF2;
+			originalYear = cfgHash.year;
+			dbService = dbServiceAutoConnect;			// DB connection is ready before dependencies resolution
+			mongoose = dbService.getDriver();
+			User = UserSchema;
+			done();
+		});
+	});
 
-    beforeEach((done) => {
+	after(done => {
+		Promise.all([
+			User.find({"user" : "testUserCreation"}).remove().exec(),
+			User.find({"user" : "testUserPwdHash"}).remove().exec()
+		])
+			.then(meta => { dbService.disconnect(); done(); })
+			.catch(err => { dbService.disconnect();	done(err); })
+	});
 
-		var cleanupPromises = [];
-
-		// Promise.all these
-		Promise.all(cleanupPromises).then(
-			(meta) => { done() },
-			(err) => { 
-				console.log('Error: ' + err);
-				done(err);
-			});
+    beforeEach(done => {
+		Promise.all([
+			User.find({"user" : "testUserCreation"}).remove().exec(),
+			User.find({"user" : "testUserPwdHash"}).remove().exec()
+		])
+			.then(meta => { done() })
+			.catch(err => {  done(err) });
     });
 	
 	describe('Creation', () => {
-		
-		beforeEach((done) => {
-					
-			var cleanupPromises = [];
-			
-			cleanupPromises.push(User.find({"user" : "testUserCreation"}).remove().exec());
-
-			// Promise.all these
-			Promise.all(cleanupPromises).then(
-				(meta) => { done() },
-				(err) => { 
-					console.log('Error: ' + err);
-					done(err);
-				});
-		});
         
-		// Test 
-		it('should work', (done) => {
+		it('should work', done => {
 			
-			var testUser = new User();
+			let testUser = new User();
 			testUser.user = "testUserCreation";
 			testUser.pwd = "aPwdToHash";
 			
-            testUser.save(function (err, aUser){
-
-				// There should be no error
-				if(err) console.log(err);
-				should.equal(err, null);
-				
-				// Username should be set properly
-				aUser.user.should.equal("testUserCreation");
-
-				done();	// Arhooo!
-            });
+            testUser.save()
+				.then(aUser => {
+					aUser.user.should.equal("testUserCreation");
+					done()
+				})
+				.catch(err => { done(err) });
 		});
 	});
 	
 	describe('Password', () => {
 		
-		beforeEach((done) => {
-					
-			var cleanupPromises = [];
+		it('comparison using wrong password should fail', (done) => {
 			
-			cleanupPromises.push(User.find({"user" : "testUserPwdHash"}).remove().exec());
-
-			// Promise.all these
-			Promise.all(cleanupPromises).then(
-				(meta) => { done() },
-				(err) => { 
-					console.log('Error: ' + err);
-					done(err);
-				});
-		});
-		
-		it('comparison using same iteration count and salt should give the same hash', (done) => {
-			
-			var testUser = new User();
+			let testUser = new User();
 			testUser.user = "testUserPwdHash";
 			testUser.pwd = "VladPutinCanDecryptHashes";
 			
-            testUser.save((err, aUser) => {
-
-				// There should be no error
-				should.equal(err, null);
-			
-				// Compare saved hash with re-input password
-				aUser.comparePassword("VladPutinCanDecryptHashes", (result) => {
-					assert(result === true, "hashed input password matches original hash in database");
-
-					done();	// Arhooo!
-				});
-            });
+            testUser.save()
+				.then(aUser => aUser.comparePassword("VladPutinCanDecryptHasheZ"))
+				.then((result) => {
+					assert(result, "hashed input password matches original hash in database"); 
+					done();
+				})
+				.catch(err =>  done())
 		});
 		
-		it('comparison against a wrong password fails', (done) => {
+		it('comparison using same password, iteration count & salt should succeed', (done) => {
 			
-			var testUser = new User();
+			let testUser = new User();
 			testUser.user = "testUserPwdHash";
 			testUser.pwd = "VladPutinCanDecryptHashes";
 			
-            testUser.save((err, aUser) => {
-
-				// There should be no error
-				should.equal(err, null);
-			
-				// Compare saved hash with re-input password
-				aUser.comparePassword("ChuckNorrisCanDecryptHashes", (result) => {
-					assert(result === false, "different password should output a different hash");
-
-					done();	// Arhooo!
-				});
-            });
+            testUser.save()
+				.then(aUser => aUser.comparePassword("VladPutinCanDecryptHashes"))
+				.then((result) => {
+					assert(result, "hashed input password matches original hash in database"); 
+					done();
+				})
+				.catch(err =>  done(err) );
 		});
 		
 		it('complexity incrased with login after a year passes', (done) => {
-			
-			var testUser = new User();
+		
+			let testUser = new User();
 			testUser.user = "testUserPwdHash";
 			testUser.pwd = "VladPutinCanDecryptHashes";
 			
-            testUser.save((err, aUser) => {
-
-				// There should be no error
-				should.equal(err, null);
+			let originalPassword, updatedPassword;
 			
-				// Store original password - this to ensure a new one will be generated as a year passes
-				var originalYear = cfgHash.year;
-				var originalPassword = aUser.pwd;
+			// Example of the beauty of ES6 promises vs readability
+			testUser.save()
 			
-				// Incrase complexity
-				cfgHash.year--;
+				// Step 1: Save user, increase complexity and compare password
+				.then(aUser => {
+					originalYear = cfgHash.year;
+					originalPassword = aUser.pwd.split(':');
+					cfgHash.year--;	// Incrase complexity
+					return aUser.comparePassword("VladPutinCanDecryptHashes");
+				})
 				
-				// Compare saved hash with re-input password
-				aUser.comparePassword("VladPutinCanDecryptHashes", (result) => {
-					assert(result === true, "deprecated password hash should still allow authentication");
-
-					User.findOne({'user' : 'testUserPwdHash'}, 'pwd', (err, updatedUser) => {
-						
-						var original = originalPassword.split(':');
-						var updated = updatedUser.pwd.split(':');
-						
-						assert(parseInt(original[0]) * 2 === parseInt(updated[0]), "iteration count has doubled with year increase");
-						assert(original[1] !== updated[1], "salt has been regenerated");
-						assert(original[2] !== updated[2], "hashes cannot be identical");
-						
-						aUser.comparePassword("VladPutinCanDecryptHashes", (result) => {
-							
-							User.findOne({'user' : 'testUserPwdHash'}, 'pwd', (err, nonUpdatedUser) => {
-						
-								var nonUpdated = nonUpdatedUser.pwd.split(':');
-								
-								assert(parseInt(nonUpdated[0]) === parseInt(updated[0]), "iteration must be similar as update just happened");
-								assert(nonUpdated[1] === updated[1], "salt has not been regenerated");
-								assert(nonUpdated[2] === updated[2], "hash is identical");
-								
-								// Reset complexity (y0)							
-								assert(originalYear === ++cfgHash.year, "year has been restored");
-								
-								done();	// Arhooo!
-							});
-						});
-					});
-				});
-            });
+				// Step 2: Ensure that deprecated complexity still validates the password
+				.then(result => {
+					assert(result, "deprecated password hash should still allow authentication");
+					return User.findOne({'user' : 'testUserPwdHash'}, 'pwd').exec()
+				})
+				
+				// Step 3: Validate that hash and salt have been regenerated and compleity has doubled
+				.then(updatedUser => {
+					updatedPassword = updatedUser.pwd.split(':');
+					assert(parseInt(originalPassword[0]) * 2 === parseInt(updatedPassword[0]), "iteration count has doubled with year increase");
+					assert(originalPassword[1] !== updatedPassword[1], "salt has been regenerated");
+					assert(originalPassword[2] !== updatedPassword[2], "hashes cannot be identical");
+					return updatedUser.comparePassword("VladPutinCanDecryptHashes");
+				})
+				
+				// Step 4: Compare passwords again (with no complexity++), hashes mustn't have changed
+				.then(result => User.findOne({'user' : 'testUserPwdHash'}, 'pwd').exec())
+				.then(nonUpdatedUser => {
+					let nonUpdated = nonUpdatedUser.pwd.split(':');		
+					assert(parseInt(nonUpdated[0]) === parseInt(updatedPassword[0]), "iteration must be similar as update just happened");
+					assert(nonUpdated[1] === updatedPassword[1], "salt has not been regenerated");
+					assert(nonUpdated[2] === updatedPassword[2], "hash is identical");
+					assert(originalYear === ++cfgHash.year, "year has been restored"); // Reset complexity (y0)
+					done();	// Arhooo!
+				})
+				.catch(err =>  done(err));				
 		});
-	
+		
 		it('should be updated when modifying the model and a year has passed', (done) => {
 			
-			var testUser = new User();
+			let testUser = new User();
 			testUser.user = "testUserPwdHash";
 			testUser.pwd = "VladPutinCanDecryptHashes";
 			
-            testUser.save((err, aUser) => {
-
-				// There should be no error
-				should.equal(err, null);
-				
-				// Keep track of original complexity
-				var originalYear = cfgHash.year;
-				var originalPassword = aUser.pwd;
+			let originalPassword, updatedPassword, nonUpdatedPassword;
 			
-				// Compare saved hash with re-input password
-				aUser.roles.push('bear-rider');
+			testUser.save()
+			
+				// Step 1: Modify model and increase complexity - should regen hash
+				.then(aUser => {
+					originalPassword = aUser.pwd.split(':');
+					aUser.roles.push('bear-rider');		// Add a role to validate a hash is regen'ed when when complixity increased in the meantime
+					cfgHash.year--;						// Incrase complexity
+					return aUser.save();
+				})
 				
-				// Incrase complexity (y-1)
-				cfgHash.year--;
-				
-				
-				aUser.save((err, updatedUser) => {
+				// Step 2: Ensure salt&hash were regen'ed, then use a db-side update (push) - 
+				.then(updatedUser => {
+					updatedPassword = updatedUser.pwd.split(':');
 					
-					var original = originalPassword.split(':');
-					var updated = updatedUser.pwd.split(':');
+					assert(parseInt(originalPassword[0]) * 2 === parseInt(updatedPassword[0]), "iteration count has doubled with year increase");
+					assert(originalPassword[1] !== updatedPassword[1], "salt has been regenerated");
+					assert(originalPassword[2] !== updatedPassword[2], "hashes cannot be identical");
+					
+					cfgHash.year--; // Incrase complexity (y-2)
+					return User.updateOne({user: 'testUserPwdHash'}, {$pushAll: {roles:['VaznagrajdonBudetTolkoAddin']}}, {upsert:true});
+				})
+				
+				// Step 3: Hash shouldn't be regen'ed by db-side update-push
+				.then(() => User.findOne({user: 'testUserPwdHash'}, 'pwd').exec())
+				.then(nonUpdatedUser => {
+					nonUpdatedPassword = nonUpdatedUser.pwd.split(':');
+					
+					assert(parseInt(nonUpdatedPassword[0]) === parseInt(updatedPassword[0]), "iteration count must be similar - update via db push");
+					assert(nonUpdatedPassword[1] === updatedPassword[1], "salt has not been regenerated");
+					assert(nonUpdatedPassword[2] === updatedPassword[2], "hash is identical");
+					
+					cfgHash.year++; // Reset complexity (to y-1)
+					return nonUpdatedUser.save();
+				})
+				
+				// Step 4: Back to y-1 (from y-2), hash&salt shouldn't be regen'ed
+				.then(lastUpdatedUser => {
+					let lastUpdatedPassword = lastUpdatedUser.pwd.split(':');
 
-					assert(parseInt(original[0]) * 2 === parseInt(updated[0]), "iteration count has doubled with year increase");
-					assert(original[1] !== updated[1], "salt has been regenerated");
-					assert(original[2] !== updated[2], "hashes cannot be identical");
+					assert(parseInt(nonUpdatedPassword[0]) === parseInt(lastUpdatedPassword[0]), "iteration count is similar, complexity was already y-1");
+					assert(nonUpdatedPassword[1] === lastUpdatedPassword[1], "salt has not been regenerated");
+					assert(nonUpdatedPassword[2] === lastUpdatedPassword[2], "hash is identical");
 					
-					// Incrase complexity (y-2)
-					cfgHash.year--;
-					
-					// Push operation shouldn't go through the "save process" (involving preSave hook)
-					User.updateOne({user: 'testUserPwdHash'}, {$pushAll: {roles:['bear-rider']}}, {upsert:true}, (err, meta) => {
-
-						User.findOne({user: 'testUserPwdHash'}, 'pwd', (err, nonUpdatedUser) => {
-														
-							var nonUpdated = nonUpdatedUser.pwd.split(':');
-							
-							assert(parseInt(nonUpdated[0]) === parseInt(updated[0]), "iteration count must be similar - update via db push");
-							assert(nonUpdated[1] === updated[1], "salt has not been regenerated");
-							assert(nonUpdated[2] === updated[2], "hash is identical");
-							
-							// There should be no error
-							should.equal(err, null);
-							
-							// Reset complexity (to y-1)
-							cfgHash.year++;
-							
-							aUser.save((err, lastUpdatedUser) => {
-								
-								var lastUpdated = lastUpdatedUser.pwd.split(':');
-								
-								assert(parseInt(nonUpdated[0]) === parseInt(lastUpdated[0]), "iteration count is similar, complexity was already y-1");
-								assert(nonUpdated[1] === lastUpdated[1], "salt has not been regenerated");
-								assert(nonUpdated[2] === lastUpdated[2], "hash is identical");
-								
-								// Reset complexity (y0)							
-								assert(originalYear === ++cfgHash.year, "year has been restored");
-								
-								done();		// This - is - Sparta!
-							});
-						});
-					});
-				});				
-            });
+					// Reset complexity (y0)							
+					assert(originalYear === ++cfgHash.year, `year has been restored from ${cfgHash.year} to ${originalYear}`);
+					done();		// This - is - Sparta!
+				})
+				
+				.catch(err =>  done(err));
 		});
 	});
 });

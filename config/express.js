@@ -1,6 +1,6 @@
 module.exports = function configureExpressFactory(config){
 
-	var bodyparser  = require('body-parser');   //
+	let bodyparser  = require('body-parser');   //
 
     function configureExpress(expressApp){
 		
