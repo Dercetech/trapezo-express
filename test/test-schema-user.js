@@ -1,20 +1,16 @@
 "use strict";
-
-// Requires
-let Promise		= require('bluebird');
-let chai 		= require("chai");
-let chaiHttp 	= require("chai-http");
-let should 		= chai.should();
-let assert		= chai.assert;
-
-
 describe('DB Schema: User', () => {
+
+	// Requires
+	let Promise		= require('bluebird');
+	let chai 		= require("chai");
+	let chaiHttp 	= require("chai-http");
+	let should 		= chai.should();
+	let assert		= chai.assert;
 	
 	let cfg, cfgHash, dbService, mongoose, User;
 	let originalYear;
-	
-	process.env.NODE_ENV = "test";
-	
+		
 	before(done => {
 		require("trapezo").resolve(module, function (config, dbServiceAutoConnect, UserSchema) {
 			cfg = config;

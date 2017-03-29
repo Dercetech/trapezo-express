@@ -59,8 +59,16 @@ module.exports = function(
 	}
 
     function stop(){
-        dbService.disconnect();
-        if(facade.server) httpServer.stop();
+		return new Promise( (resolve, reject) => {
+			Promise.all([dbService.disconnect()])
+			.then( () => {
+				if(facade.server) httpServer.stop();
+				resolve();
+			})
+			.catch( (err) => {
+				reject(err);
+			});
+		});
     }
 
 	return facade;
