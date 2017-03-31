@@ -8,8 +8,11 @@ Using Trapezo dependency injection library (also written by Jérémie Mercier, y
 The following ENV variables are needed:
 set CFG_PWD=za0ZA9-aLongPasswordThatDoesntMakeMuchSenseUnlessItTriesToEscapeABruteforceAlgorithmButThenWhatRelevantDataDoIExposeQuesitonMark
 set CFG_MDB=mongodb://127.0.0.1:27017/micro-auth
+set NODE_ENV=test
 set CFG_MDB_TEST=mongodb://127.0.0.1:27017/micro-auth-test
+#set NODE_ENV=prod
 set CFG_MDB_PROD=mongodb://127.0.0.1:27017/micro-auth-prod
+
 
 ## Misc & cheat sheets
 Markdown syntax: https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet

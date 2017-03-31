@@ -4,7 +4,7 @@ module.exports = function configFactory(){
     let path    = require('path');
 
 	// Environment
-	let environment = process.env.NODE_ENV ? process.env.NODE_ENV : 'prod';
+	let environment = process.env.NODE_ENV ? process.env.NODE_ENV : 'dev';
 	
     //////////////////////////////////////////
     // Server configuration //////////////////

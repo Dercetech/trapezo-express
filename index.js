@@ -30,6 +30,9 @@ require('trapezo').resolve(module, function(main){
 		if(version) console.log("Dercetech Authentication µService ready (v" + version + ")");
 		else console.log("Dercetech Authentication µService ready - please run using 'npm start'.");
 		
+		// Display running environment
+		if(process.env.NODE_ENV) console.log(`Environment: ${process.env.NODE_ENV}`)
+		
 		// Output API status
 	    console.log('API: ' + httpServer.address().address + ':' + httpServer.address().port);
     });

@@ -2,7 +2,7 @@
 module.exports = function configure(injector) {
 
 	// Routes of the application
-	injector.register('configureRoutes', require('./routes'));
+	injector.register('routes', require('./routes'));
 
 	// API route
     injector.register('apiRoute', require('./api-route'));

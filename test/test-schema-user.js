@@ -25,12 +25,23 @@ describe('DB Schema: User', () => {
 
 	after(done => {
 		Promise.all([
-			User.find({"user" : "testUserCreation"}).remove().exec(),
-			User.find({"user" : "testUserPwdHash"}).remove().exec()
+			// User.find({"user" : "testUserCreation"}).remove().exec(),
+			// User.find({"user" : "testUserPwdHash"}).remove().exec()
 		])
-			.then(meta => { dbService.disconnect(); done(); })
+			.then(meta => { dbService.disconnect(); done(); })			// Very important do disconnect, see note below
 			.catch(err => { dbService.disconnect();	done(err); })
 	});
+	
+	/*
+		Why is disconnect so important?
+		See dbService.disconnect implementation. It destroys all mongoose models and schemas that were registered within this process.
+		Potential issue:
+		- Test 1 & 2 are both using the User schema
+		- UserSchema relies on the config object's hash year to compute complexity
+		- Test 1's resolve creates one config
+		- Test 2's resolve creates one config, too
+		- Test 2 will use the first User schema that was created and that one will 
+	*/
 
     beforeEach(done => {
 		Promise.all([
@@ -121,6 +132,7 @@ describe('DB Schema: User', () => {
 					assert(parseInt(originalPassword[0]) * 2 === parseInt(updatedPassword[0]), "iteration count has doubled with year increase");
 					assert(originalPassword[1] !== updatedPassword[1], "salt has been regenerated");
 					assert(originalPassword[2] !== updatedPassword[2], "hashes cannot be identical");
+
 					return updatedUser.comparePassword("VladPutinCanDecryptHashes");
 				})
 				

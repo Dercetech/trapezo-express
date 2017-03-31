@@ -1,12 +1,18 @@
 'use strict';
-module.exports = function configureRoutesFactory(
+module.exports = function routesFactory(
 		apiRoute,
 		fourOhFourHandler
 	){
 
     let express     = require('express');
     let path        = require('path');
-
+	
+	function registerExternalRoutes(expressApp, externalRoutes){
+		for (var route of externalRoutes) {
+			expressApp.use(route.endpoint, route.router);
+		}
+	}
+	
     function configureRoutes(expressApp){
 
 		// Static content - should upgrade Trapezo to provide true server root
@@ -20,10 +26,13 @@ module.exports = function configureRoutesFactory(
 
 	    // API
 	    expressApp.use('/api', apiRoute);
-
+		
 		// Finally, default to 404
-		expressApp.use(fourOhFourHandler);
+		//expressApp.use(fourOhFourHandler);
     }
 
-    return configureRoutes;
+    return {
+		registerExternalRoutes	: registerExternalRoutes,
+		configureRoutes			: configureRoutes
+	};
 }
