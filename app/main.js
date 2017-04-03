@@ -24,22 +24,21 @@ module.exports = function(
 	    stop            		: stop
 	}
 
+	// Express setup (includes header config & CORS)	// Important to configure Express first: bodyparser MUST be available before configuring custom routes
+	configureExpress(app);
+
+	// Logging setup
+	//app.use(morgan('dev'));
+	
+	
 	function registerExternalRoutes(externalRoutes){
-		
+
 		if(initStatus !== 0) throw { name : "ServerAlreadyInitialized", description : "Attempting to add routes to an already running server" };
 		else routes.registerExternalRoutes(app, externalRoutes ? externalRoutes : []);
 	}
 	
-	function initApp(){
+	function initRoutes(){
 		return new Promise( (resolve, reject) => {
-			
-			// Express setup (includes header config & CORS)
-			configureExpress(app);
-			
-			// Logging setup
-			//app.use(morgan('dev'));
-
-			// Routes
 			routes.configureRoutes(app);
 			resolve();
 		});
@@ -55,7 +54,7 @@ module.exports = function(
 	
     function start(){
 		return new Promise( (resolve, reject) => {
-			Promise.all( (initStatus === 0) ? [initApp(), initDatabase()] : []).then( () => {
+			Promise.all( (initStatus === 0) ? [initRoutes(), initDatabase()] : []).then( () => {
 				initStatus = 1;
 			
 				if(dbService.status !== 1) throw { name: "databaseNotAvailable", message: "Database unavailable - server will not start" };
