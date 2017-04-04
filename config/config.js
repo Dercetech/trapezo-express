@@ -88,7 +88,8 @@ module.exports = function configFactory(){
 			
 			"jot"	: {
 				"tokenSecret"	: tokenSecret,	// Secret used when generating JOTs
-				"expiration"	: 60 * 60 * 24	// 24h expiry time
+				"expiration"	: 60 * 60 * 24, // 24h expiry time
+				"renew"			: 60 * 60 * 24 / 2
 			},
 			
 			// Hashing algorithms configuration

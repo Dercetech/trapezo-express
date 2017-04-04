@@ -1,5 +1,5 @@
 'use strict';
-module.exports = function authenticationHandlerFactory(config, UserSchema){
+module.exports = function authenticationHandlerFactory(config, UserSchema, authenticationTokenGenerator){
     
 	/*
 		A good artcile Jem appreciated before writing this:
@@ -29,41 +29,16 @@ module.exports = function authenticationHandlerFactory(config, UserSchema){
 		// Step2: Generate token
 		.then(isValid => {
 			if(isValid){
-				let token = jwt.sign(
-
-					// payload
-					{
-						'id'    : user._id,
-						'user'  : user.user,
-						'roles' : user.roles
-					},
-					
-					// Secret
-					tokenCfg.tokenSecret,
-					
-					// options
-					{
-						expiresIn  	: tokenCfg.expiration,
-						header		: { }
-					}
-				);
-				
-				// Remove token header (why give hints to a script kiddie?)
-				//let segments = token.split('.');
-				//token = '.' + segments[1] + '.' + segments[2];
-				
-				// Jem sez: How to obtain token claims?
-				// let tokenClaims = new Buffer(token.split('.')[1], 'base64').toString();
-				res.json({'token': token}); //, 'roles': user.roles});
+				let token = authenticationTokenGenerator(user._id, user.user, user.roles);
+				res.set("Authorization", token);
+				res.send("OK");
 			}
-			
-			else throw {name: 403};
+			else throw {name: 401};
 		})
 		
 		.catch(err => { 
 			switch(err.name){
-				
-				case 403	: res.sendStatus(403); break;
+				case 401	: res.sendStatus(401); break;
 				default		: res.status(500).send(err);
 			 }
 		});

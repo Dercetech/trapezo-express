@@ -1,6 +1,9 @@
 'use strict';
 module.exports = function configure(injector) {
 
+	// Token generation service
+	injector.register('authenticationTokenGenerator', require('./authentication-token-generator'));
+
 	// Route: Authentication
 	injector.register('authenticationRoute', require('./authentication-route'));
 

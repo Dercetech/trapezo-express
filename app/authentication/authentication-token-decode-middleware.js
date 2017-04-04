@@ -1,5 +1,5 @@
 'use strict';
-module.exports = function authenticationTokenDecodeMiddlewareFactory(config){
+module.exports = function authenticationTokenDecodeMiddlewareFactory(config, authenticationTokenGenerator){
     
 	/*
 		A good artcile Jem appreciated before creating these token middlewares:
@@ -29,13 +29,37 @@ module.exports = function authenticationTokenDecodeMiddlewareFactory(config){
 				
 				// Error handling
 				if(err){
-					res.sendStatus(400);	// 400: bad request, malformed token
+					switch(err.name){
+						
+						/*
+							Expired tokens, Jem asked himself: 401 or 403?
+							-	The 401 (Unauthorized) status code indicates that the request has not been applied because it lacks valid authentication credentials for the target resource. The server generating a 401 response MUST send a WWW-Authenticate header field (Section 4.1) containing at least one challenge applicable to the target resource.
+							-	A server that receives valid credentials that are not adequate to gain access ought to respond with the 403 (Forbidden) status code.
+						*/
+						
+						case "TokenExpiredError" 	: res.sendStatus(401); break;		// 401: token has expired,
+						default 					: res.sendStatus(400);				// 400: bad request, malformed token
+					}					
 				}
 
-				// Save decoded token in request for other routes
 				else{
-					req.decodedToken = decoded;
-					next();
+
+					// Half life renewal
+					let renewIn = (decoded.exp - tokenCfg.renew) - (new Date().getTime() / 1000);
+					if(renewIn <= 0){
+						token = authenticationTokenGenerator(decoded.id, decoded.user, decoded.roles);
+						jwt.verify(token, tokenCfg.tokenSecret, (err, decoded) => {
+							res.set("Authorization", token);
+							req.decodedToken = decoded;
+							next();
+						});
+					}
+					
+					else{
+						// Save decoded token in request for other routes
+						req.decodedToken = decoded;
+						next();
+					}
 				}
 			});
         }

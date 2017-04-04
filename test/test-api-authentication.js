@@ -10,12 +10,14 @@ describe('Authentication', () => {
 
 	chai.use(chaiHttp);
 	
-	let cfg, server, httpServer, User;
+	let cfg, tokenCfg, server, httpServer, User;
 	let userToken, adminToken;
+	let originalExpiration, originalTokenRenew;
 
 	before(done => {
 		
 		require("trapezo").resolve(module, function(
+			config,
 			main,
 			routes,
 			UserSchema,
@@ -25,6 +27,11 @@ describe('Authentication', () => {
 			
 			server = main;
 			User = UserSchema;
+			
+			cfg = config;
+			tokenCfg = config.security.jot;
+			originalExpiration = tokenCfg.expiration;
+			originalTokenRenew = tokenCfg.renew;
 			
 			// Create 4 different routes (public, authenticated, role:user, role:admin)
 			let router	= express.Router();
@@ -117,10 +124,12 @@ describe('Authentication', () => {
 					.send({user: "testAuthenticationUser_ADMIN", pwd: "dontLookBehindYouSlenderManIsClose" })				
 				})
 				.then( (res) => {
-					
-					let data = JSON.parse(res.text);
-					assert(data.hasOwnProperty("token"), "a token should have been returned");
-					adminToken = data.token;
+					assert(res.headers.authorization, "authorization header must be set");
+					let authorizationHeader = res.headers.authorization;
+					adminToken = authorizationHeader;
+					// let data = JSON.parse(res.text);
+					// assert(data.hasOwnProperty("token"), "a token should have been returned");
+					// adminToken = data.token;
 					
 					return testUser.save()
 
@@ -145,12 +154,15 @@ describe('Authentication', () => {
 					assert(res.status === 200, "base POST query should be successful");				
 					
 					// Parse token
-					let data = JSON.parse(res.text);
-					assert(data.hasOwnProperty("token"), "a token should have been returned");
-					userToken = data.token;
+					// let data = JSON.parse(res.text);
+					// assert(data.hasOwnProperty("token"), "a token should have been returned");
+					// userToken = data.token;
+					
+					let authorizationHeader = res.headers.authorization;
+					userToken = authorizationHeader;
 					
 					// Obtain token roles
-					let tokenClaims = new Buffer(data.token.split('.')[1], 'base64').toString();
+					let tokenClaims = new Buffer(userToken.split('.')[1], 'base64').toString();
 					let roles = (JSON.parse(tokenClaims)).roles;
 					// console.log(tokenClaims); {iat: ..., exp: ...}
 					assert(roles[0] === "user", "the token has role 'user'");
@@ -302,6 +314,105 @@ describe('Authentication', () => {
 						if(err.status === 403) done();
 						else done(err)
 					} );
+		});
+	});
+
+	describe("token lifecycle", done => {
+		
+		afterEach( done => { 
+			tokenCfg.expiration = originalExpiration;
+			tokenCfg.renew = originalTokenRenew;
+			done();
+		});
+
+		beforeEach( done => { 
+			tokenCfg.expiration = originalExpiration;
+			tokenCfg.renew = originalTokenRenew;
+			done();
+		});
+		
+		it("should refuse token that expired", done => {
+			
+			tokenCfg.expiration = 0;
+			let expiredToken;
+			
+			// Authenticate after token ttl is set to 0
+			chai.request(httpServer)
+				.post("/api/authenticate")
+				.set('content-type', 'application/x-www-form-urlencoded')
+				.send({user: "testAuthenticationUser", pwd: "dontLookBehindYouSlenderManIsClose" })
+				.then( res => {
+					
+					let authorizationHeader = res.headers.authorization;
+					expiredToken = authorizationHeader;
+					
+					return chai.request(httpServer)
+						.get("/test-api-authentication/test-token-contents")
+						.set("x-access-token", expiredToken)
+						.send();
+				})
+				.then( res => {
+					done({name: "tokenShouldHaveExpired"});
+				})
+				.catch(err => {
+					assert(err.status === 401, "token should have expired");
+					done();
+				});
+		});
+		
+		it("should renew tokens that reached half-life", done => {
+			
+			// Alter expiration delay to have a new token created - test lasts less than 100ms leading to identical JOT
+			tokenCfg.expiration = originalExpiration / 2 ;
+			let initialToken, regeneratedToken;
+			
+			chai.request(httpServer)
+				.post("/api/authenticate")
+				.set('content-type', 'application/x-www-form-urlencoded')
+				.send({user: "testAuthenticationUser", pwd: "dontLookBehindYouSlenderManIsClose" })
+				.then( res => {
+
+					let authorizationHeader = res.headers.authorization;
+					initialToken = authorizationHeader;
+
+					// Reset token config
+					tokenCfg.expiration = originalExpiration;
+					tokenCfg.renew = originalExpiration;
+
+					return chai.request(httpServer)
+						.get("/test-api-authentication/test-token-contents")
+						.set("x-access-token", initialToken)
+						.send();
+				})
+				.then( res => {
+					assert(res.headers.authorization, "Authorization header should be set as token half-life was reached");
+					let authorizationHeader = res.headers.authorization;
+					regeneratedToken = authorizationHeader;
+					assert(initialToken !== regeneratedToken, "regenerated token should not be identical to original one");
+					done();
+				})
+				.catch(err => {
+					done(err);
+				});
+		});
+		
+		it("should not renew tokens before they reach their half-life", done => {
+					
+			chai.request(httpServer)
+				.post("/api/authenticate")
+				.set('content-type', 'application/x-www-form-urlencoded')
+				.send({user: "testAuthenticationUser", pwd: "dontLookBehindYouSlenderManIsClose" })
+				.then( res => chai.request(httpServer)
+					.get("/test-api-authentication/test-token-contents")
+					.set("x-access-token", res.headers.authorization)
+					.send())
+				.then( res => {
+					assert(!res.headers.authorization, "Authorization header should not be set as token half-life was not reached");
+					done();
+				})
+				.catch(err => {
+					done(err);
+				});
 		});
 	});
 });
