@@ -28,7 +28,7 @@ module.exports = function routesFactory(
 	    expressApp.use('/api', apiRoute);
 		
 		// Finally, default to 404
-		//expressApp.use(fourOhFourHandler);
+		expressApp.use(fourOhFourHandler);
     }
 
     return {
