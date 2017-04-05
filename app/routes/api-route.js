@@ -6,6 +6,9 @@ module.exports = function apiRouteFactory(
 		authenticationTokenCheck,
 		authenticationTokenRoles,
 		
+		// Revocation
+		revokeCheck,
+		
 		// Routes
 		authenticationRoute,
 		userRoute
@@ -29,7 +32,9 @@ module.exports = function apiRouteFactory(
 	
     // Tokens are expected from here /////////
     router.use(authenticationTokenDecode);
-	
+
+    // Token revocation zone begins //////////
+    router.use(revokeCheck);	
 	
     // Authentication required from here /////
     router.use(authenticationTokenCheck);
