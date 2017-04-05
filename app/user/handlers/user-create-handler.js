@@ -26,7 +26,7 @@ module.exports = function userCreateHandlerFactory(config, UserSchema){
 					switch(err.code){
 
 						// 11000: Entry already exist
-						case 11000: return res.status(400).send('duplicate unique id');
+						case 11000: return res.status(400).send('duplicate unique id'); break;
 
 						// Default case:
 						default: return res.status(500).send(err);
