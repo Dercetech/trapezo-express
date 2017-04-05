@@ -23,12 +23,12 @@ module.exports = function routesFactory(
 		/*expressApp.get('/', (req, res) => {
 			res.send("Hello, curious one!");
 		});*/
-
+		
 	    // API
 	    expressApp.use('/api', apiRoute);
 		
 		// Finally, default to 404
-		//expressApp.use(fourOhFourHandler);
+		expressApp.use(fourOhFourHandler);
     }
 
     return {

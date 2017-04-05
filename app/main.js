@@ -2,6 +2,7 @@
 module.exports = function(
 		config					// Main config file
 		,routes					// Routes config utility: sets routes for this app and possibly inject external/test routes
+		,initSuperAdmin			// If the env variable CFG_GROOT is set, the super admin "groot" will be created. Otherwise, it will be deleted.
 		,configureExpress		// Express config: body parsers, CORS middleware
 		,dbServiceAutoConnect	// Resolves the database connection object AFTER link was established
 		//,dbService			// Link must be established manually - code becomes less linear to read
@@ -54,7 +55,7 @@ module.exports = function(
 	
     function start(){
 		return new Promise( (resolve, reject) => {
-			Promise.all( (initStatus === 0) ? [initRoutes(), initDatabase()] : []).then( () => {
+			Promise.all( (initStatus === 0) ? [initSuperAdmin(), initRoutes(), initDatabase()] : []).then( () => {
 				initStatus = 1;
 			
 				if(dbService.status !== 1) throw { name: "databaseNotAvailable", message: "Database unavailable - server will not start" };
@@ -71,7 +72,7 @@ module.exports = function(
 		return new Promise( (resolve, reject) => {
 			Promise.all([dbService.disconnect()])
 			.then( () => {
-				if(facade.server) httpServer.stop();
+				if(httpServer) httpServer.close();
 				resolve();
 			})
 			.catch( (err) => {

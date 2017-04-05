@@ -22,7 +22,7 @@ module.exports = function authenticationHandlerFactory(config, UserSchema, authe
         UserSchema.findOne({'user'  : userName}).select('_id user pwd roles').exec()
 		.then(aUser => {
 			user = aUser;
-            if(!user) throw {name: 403 };
+            if(!user) throw {name: 404 };
 			else return user.comparePassword(req.body.pwd);
 		})
 		
@@ -39,6 +39,7 @@ module.exports = function authenticationHandlerFactory(config, UserSchema, authe
 		.catch(err => { 
 			switch(err.name){
 				case 401	: res.sendStatus(401); break;
+				case 404	: res.sendStatus(404); break;
 				default		: res.status(500).send(err);
 			 }
 		});

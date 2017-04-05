@@ -43,6 +43,11 @@ module.exports = function authenticationTokenDecodeMiddlewareFactory(config, aut
 				}
 
 				else{
+					
+					// Add function to check presence of role
+					req.tokenHasRole = function(theRole){
+						return req.decodedToken.roles.indexOf(theRole) !== -1;
+					}
 
 					// Half life renewal
 					let renewIn = (decoded.exp - tokenCfg.renew) - (new Date().getTime() / 1000);
