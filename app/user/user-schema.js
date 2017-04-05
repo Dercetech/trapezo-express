@@ -45,7 +45,12 @@ module.exports = function userSchemaFactory(config, registerMongooseModel){
 		
 		let passwordHasBeenModified = user.isModified('pwd');
 		let iterations = getIterationCount();
-		let complexityHasIncreased = parseInt(user.pwd.split([":"])[0]) < iterations;
+		let complexityHasIncreased = false;
+		try{
+			complexityHasIncreased = parseInt(user.pwd.split([":"])[0]) < iterations;
+		} catch (err) {
+			
+		}
 		
 		// Should update password?
 		// 1. Has password changed?
