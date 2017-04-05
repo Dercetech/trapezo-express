@@ -27,24 +27,6 @@ describe('Token revoke', () => {
 					null]);
 			})
 			.then( meta => {
-				/*
-				let adminUser = new User();
-				adminUser.user = "testUserEndpointAdminUser";
-				adminUser.pwd = "yaVijuTvoyoZelanie";
-				adminUser.roles.push('admin');
-				*/
-				return Promise.all([
-					//adminUser.save(),
-					null])
-			})
-			.then( () => { /*chai.request(httpServer)
-					.post("/api/authenticate")
-					.set('content-type', 'application/x-www-form-urlencoded')
-					.send({user: "testUserEndpointAdminUser", pwd: "yaVijuTvoyoZelanie" }) )
-			.then(res => { 
-				assert(res.headers.authorization, "authorization header must be set");
-				adminToken = res.headers.authorization;
-				*/
 				done();
 			})
 			.catch(err => {  done(err) });
