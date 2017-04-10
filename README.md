@@ -10,25 +10,25 @@ You may begin with running the tests. To do so:
 -- Mocha tests will automatically set the environment to "test"
 -- See "test/test-env-setup.js"
 
-Environment variables in Windows:
-`set CFG_PWD=aPasswordToSecureToken`
+Environment variables in Windows:<br/>
+`set CFG_PWD=aPasswordToSecureToken`<br/>
 `set CFG_MDB_TEST=mongodb://127.0.0.1:27017/trapezo-xp-test`
 
-Environment variables in UNIX/MacOS:
-`CFG_PWD=aPasswordToSecureToken`
+Environment variables in UNIX/MacOS:<br/>
+`CFG_PWD=aPasswordToSecureToken`<br/>
 `CFG_MDB_TEST=mongodb://127.0.0.1:27017/trapezo-xp-test`
 ## Installation
 ### Environment variables in dev
 Development is the default environment. No specific variable is to be set to run in development mode.
 
-`set CFG_PWD=aPasswordToSecureToken_forDev`
+`set CFG_PWD=aPasswordToSecureToken_forDev`<br/>
 `set CFG_MDB=mongodb://127.0.0.1:27017/trapezo-xp-dev`
 - **hint** Remove the `set` command on UNIX/MacOS machines.
 
 ### Environment variables in production
 
-`set CFG_PWD=aPasswordToSecureToken_forProd`
-`set CFG_MDB_PROD=mongodb://127.0.0.1:27017/trapezo-xp-prod`
+`set CFG_PWD=aPasswordToSecureToken_forProd`<br/>
+`set CFG_MDB_PROD=mongodb://127.0.0.1:27017/trapezo-xp-prod`<br/>
 `set NODE_ENV=prod`
 - **hint** Remove the `set` command on UNIX/MacOS machines.
 - **hint** Environment check at runtime available in `process.env.NODE_ENV`.
