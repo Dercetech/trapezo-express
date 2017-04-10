@@ -7,7 +7,7 @@ module.exports = function apiRouteFactory(
 		authenticationTokenRoles,
 		
 		// Revocation
-		revokeCheck,
+		// revokeCheck,				// moved to external dependency - too much overhead for the auth µService
 		
 		// Routes
 		authenticationRoute,
@@ -34,7 +34,7 @@ module.exports = function apiRouteFactory(
     router.use(authenticationTokenDecode);
 
     // Token revocation zone begins //////////
-    router.use(revokeCheck);	
+    // router.use(revokeCheck;
 	
     // Authentication required from here /////
     router.use(authenticationTokenCheck);

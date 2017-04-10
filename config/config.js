@@ -86,6 +86,10 @@ module.exports = function configFactory(){
 		
 		"security" : {
 			
+			"revocation" : {
+				"enabled"	: true,		// should be "false" in case of microservice and "true" if the project is used as project seed	
+			},
+			
 			"jot"	: {
 				"tokenSecret"	: tokenSecret,	// Secret used when generating JOTs
 				"expiration"	: 60 * 60 * 24, // 24h expiry time

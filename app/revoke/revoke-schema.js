@@ -6,8 +6,10 @@ module.exports = function revokeSchemaFactory(config, registerMongooseModel){
 	   
     let RevokeSchema = new Schema({
         
-        // Username
-        'user'  : { 'type' : String, 'required' : true, 'index' : { 'unique' : true }}
+        'user'  : { 'type' : String, 'required' : true },
+		
+		'issuedBefore'	: { 'type' : Number },	// Revoke tokens issued for this user before this date
+		'expiresAfter'	: { 'type' : Number }	// Revocation can be deleted from DB after this date
     });
 
 	return registerMongooseModel('Revoke', RevokeSchema);
