@@ -86,9 +86,10 @@ module.exports = function configFactory(){
 		
 		"security" : {
 			
-			"revocation" : {
-				"enabled"	: true,		// should be "false" in case of microservice and "true" if the project is used as project seed	
-			},
+			// TODO: export in a trapezo-express plugin
+			//"revocation" : {
+			//	"enabled"	: true,		// should be "false" in case of microservice and "true" if the project is used as project seed	
+			//},
 			
 			"jot"	: {
 				"tokenSecret"	: tokenSecret,	// Secret used when generating JOTs
