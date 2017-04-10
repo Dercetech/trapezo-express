@@ -4,14 +4,21 @@
 |*		 / // / _// , _/ /__/ _/  / / / _// /__/ _  / 	  *|
 |*		/____/___/_/|_|\___/___/ /_/ /___/\___/_//_/  	  *|
 |*												  		  *|
-|*		 Best-practice auth µService, Dercetech 2017	  *|
-|*            coded by Jérémie "Jem" Mercier              *|
+|*	 Trapezo Express, web server with DI, Dercetech 2017  *|
+|*          written by Jérémie "Jem" Mercier              *|
 |*														  *|
 \* ************ http://www.dercetech.com **************** */
 
 /*
-	This microservice is meant to authenticate users by returning a token (JOT).
-	It implements the guidelines found in the following article regarding best practices:
+	Use this as a project stub:
+	- It allows seamless dependency injection using Trapezo (v1.1).
+	- Comes with 50+ unit tests (Trapezo-based).
+	- Implements best-practice* token authentication.
+	- Written in ES6.
+	- Project structure is a suggestion - based on domains instead of roles.
+	- Mongoose wrapping.
+	
+	*It implements the guidelines found in the following article regarding best practices:
 	https://nakedsecurity.sophos.com/2013/11/20/serious-security-how-to-store-your-users-passwords-safely/
 */
 
@@ -27,8 +34,8 @@ require('trapezo').resolve(module, function(main){
 		let version = process.env && process.env.npm_package_version;
 	    
 		// Display running version
-		if(version) console.log("Dercetech Authentication µService ready (v" + version + ")");
-		else console.log("Dercetech Authentication µService ready - please run using 'npm start'.");
+		if(version) console.log("Dercetech Trapezo-Express server ready (v" + version + ")");
+		else console.log("Dercetech Trapezo-Express server ready - please run using 'npm start'.");
 		
 		// Display running environment
 		if(process.env.NODE_ENV) console.log(`Environment: ${process.env.NODE_ENV}`)

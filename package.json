@@ -1,20 +1,29 @@
 {
-  "name": "auth-microservice",
-  "version": "0.1.0",
-  "description": "Dercetech Authentication µService",
+  "name": "trapezo-express",
+  "version": "1.0.0",
+  "description": "Dercetech Trapezo server implementation with token authentication, Mongoose, Express, Mocha & REST facade.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha --timeout 10000"
+    "test": "mocha --timeout 2500"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Dercetech/auth-microservice.git"
+    "url": "git+https://github.com/Dercetech/trapezo-express.git"
   },
   "keywords": [
-    "authentication",
-    "microservice",
-    "jot"
+    "trapezo",
+	"token",
+	"authentication",
+	"security",
+	"encryption",
+	"jot",
+	"rest",
+	"unit test",
+	"mocha",
+	"chai",
+	"mongoose",
+    "microservice"
   ],
   "author": "Jérémie Mercier (Jem)",
   "license": "ISC",
@@ -26,8 +35,7 @@
     "jsonwebtoken": "^7.3.0",
     "mongoose": "^4.9.1",
     "node-forge": "^0.7.0",
-    "pug": "^2.0.0-beta11",
-    "trapezo": "^1.1.0"
+    "trapezo": "1.1.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
