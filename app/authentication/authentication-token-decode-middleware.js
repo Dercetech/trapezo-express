@@ -1,5 +1,5 @@
 'use strict';
-module.exports = function authenticationTokenDecodeMiddlewareFactory(config, authenticationTokenGenerator){
+module.exports = function authenticationTokenDecodeMiddlewareFactory(config, UserSchema, authenticationTokenGenerator){
     
 	/*
 		A good artcile Jem appreciated before creating these token middlewares:
@@ -52,12 +52,19 @@ module.exports = function authenticationTokenDecodeMiddlewareFactory(config, aut
 					// Half life renewal
 					let renewIn = (decoded.exp - tokenCfg.renew) - (new Date().getTime() / 1000);
 					if(renewIn <= 0){
-						token = authenticationTokenGenerator(decoded.id, decoded.user, decoded.roles);
-						jwt.verify(token, tokenCfg.tokenSecret, (err, decoded) => {
-							res.set("Authorization", token);
-							req.decodedToken = decoded;
-							next();
-						});
+						
+						// Ensure the user still exists
+						UserSchema.find({user: decoded.user}).lean().exec()
+						.then( list => {
+							if(list.length !== 1) throw {name: "regenRefusedAsUserGotDeleted"};
+							token = authenticationTokenGenerator(decoded.id, decoded.user, list[0].roles);
+							jwt.verify(token, tokenCfg.tokenSecret, (err, decoded) => {
+								res.set("Authorization", token);
+								req.decodedToken = decoded;
+								next();
+							});
+						})
+						.catch( err => res.sendStatus(401));
 					}
 					
 					else{

@@ -414,5 +414,86 @@ describe('Authentication', () => {
 					done(err);
 				});
 		});
+		
+		it("regeneration includes role updates", done => {
+			
+			// Alter expiration delay to have a new token created - test lasts less than 100ms leading to identical JOT
+			tokenCfg.expiration = originalExpiration / 2 ;
+			let initialToken, regeneratedToken;
+			
+			chai.request(httpServer)
+				.post("/api/authenticate")
+				.set('content-type', 'application/x-www-form-urlencoded')
+				.send({user: "testAuthenticationUser", pwd: "dontLookBehindYouSlenderManIsClose" })
+				.then( res => {
+
+					let authorizationHeader = res.headers.authorization;
+					initialToken = authorizationHeader;
+
+					// Reset token config
+					tokenCfg.expiration = originalExpiration;
+					tokenCfg.renew = originalExpiration;
+
+					return User.find({user: "testAuthenticationUser"}).exec()
+				})
+				.then ( list => {
+					let user = list[0];
+					user.roles.push("regenerator")
+					return user.save()
+				})
+				.then( () => chai.request(httpServer)
+						.get("/test-api-authentication/test-token-contents")
+						.set("x-access-token", initialToken)
+						.send() )
+				.then( res => {
+					assert(res.headers.authorization, "Authorization header should be set as token half-life was reached");
+					let authorizationHeader = res.headers.authorization;
+					regeneratedToken = authorizationHeader;
+					
+					// Obtain token roles
+					let tokenClaims = new Buffer(regeneratedToken.split('.')[1], 'base64').toString();
+					let roles = (JSON.parse(tokenClaims)).roles;
+					
+					assert(roles.indexOf("regenerator"), "role 'regenerator' should have been added");
+					done();
+				})
+				.catch(err => {
+					done(err);
+				});
+		});
+		
+		it("regeneration refused if user was deleted in the meantime", done => {
+			
+			// Alter expiration delay to have a new token created - test lasts less than 100ms leading to identical JOT
+			tokenCfg.expiration = originalExpiration / 2 ;
+			let initialToken, regeneratedToken;
+			
+			chai.request(httpServer)
+				.post("/api/authenticate")
+				.set('content-type', 'application/x-www-form-urlencoded')
+				.send({user: "testAuthenticationUser", pwd: "dontLookBehindYouSlenderManIsClose" })
+				.then( res => {
+
+					let authorizationHeader = res.headers.authorization;
+					initialToken = authorizationHeader;
+
+					// Reset token config
+					tokenCfg.expiration = originalExpiration;
+					tokenCfg.renew = originalExpiration;
+
+					return User.remove({user: "testAuthenticationUser"})
+				})
+				.then( () => chai.request(httpServer)
+						.get("/test-api-authentication/test-token-contents")
+						.set("x-access-token", initialToken)
+						.send() )
+				.then( res => {
+					done("User was deleted, regeneration should not have happened");
+				})
+				.catch(err => {
+					assert(err.status === 401, "User deleted, token expired");
+					done();
+				});
+		});
 	});
 });
