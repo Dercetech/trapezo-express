@@ -19,9 +19,8 @@ module.exports = function routesFactory(
 		let pathToSite = path.join(__dirname, '..', 'public', 'www');
 		expressApp.use(/*"/",*/express.static(pathToSite));
 
-		expressApp.get('/', (req, res) => {
-			res.json({});
-		});
+		// Let the server provide static content for this
+		// expressApp.get('/', (req, res) => res.json({}) );
 		
 	    // API
 	    expressApp.use('/api', apiRoute);

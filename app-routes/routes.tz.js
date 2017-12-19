@@ -12,4 +12,8 @@ module.exports = function configure(injector) {
 
 	// API route
     injector.register('apiRoute', require('./api/api-route'));
+    {
+        // Route: Authentication
+        injector.register('authenticationRoute', require('./api/core-routes/authentication-route'));
+    }
 };

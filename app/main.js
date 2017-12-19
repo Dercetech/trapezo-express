@@ -2,28 +2,28 @@
 module.exports = function(
 		config					// Main config file
 		,routes					// Routes config utility: sets routes for this app and possibly inject external/test routes
-		,initSuperAdmin			// If the env variable CFG_GROOT is set, the super admin "groot" will be created. Otherwise, it will be deleted.
+		,initAdmin				// If the env variable CFG_GROOT is set, the super admin "groot" will be created. Otherwise, it will be deleted.
 		,configureExpress		// Express config: body parsers, CORS middleware
 		,dbServiceAutoConnect	// Resolves the database connection object AFTER link was established
 		//,dbService			// Link must be established manually - code becomes less linear to read
 	){
 
 	// Requires
-	let express     = require('express');       //
-	let app         = express();                //
-	//let morgan      = require('morgan');      //
-	let path        = require('path');          //
-	let Promise		= require('bluebird');		//
+	const express   = require('express');
+	const app       = express();
+	//const morgan  = require('morgan');
+	const path      = require('path');
+	const Promise	= require('bluebird');
 
     let dbService, httpServer = null;
 	let initStatus = 0;
 
-	let facade = {
+	const facade = {
 		registerExternalRoutes	: registerExternalRoutes,
 	    start           		: start,
 	    getHttpServer   		: getHttpServer,
 	    stop            		: stop
-	}
+	};
 
 	// Express setup (includes header config & CORS)	// Important to configure Express first: bodyparser MUST be available before configuring custom routes
 	configureExpress(app);
@@ -44,7 +44,8 @@ module.exports = function(
 			resolve();
 		});
 	}
-	
+
+	// Better use the dependency that resolves upon DB readiness (aka dbServiceAutoConnect)
 	function initDatabase(){
 		return new Promise( (resolve, reject) => {
 			// dbService.connect(() => { resolve() });
@@ -55,7 +56,7 @@ module.exports = function(
 	
     function start(){
 		return new Promise( (resolve, reject) => {
-			Promise.all( (initStatus === 0) ? [initSuperAdmin(), initRoutes(), initDatabase()] : []).then( () => {
+			Promise.all( (initStatus === 0) ? [initAdmin(), initRoutes(), initDatabase()] : []).then( () => {
 				initStatus = 1;
 			
 				if(dbService.status !== 1) throw { name: "databaseNotAvailable", message: "Database unavailable - server will not start" };
@@ -82,7 +83,4 @@ module.exports = function(
     }
 
 	return facade;
-
-	// Start server /////////////////////////////
-	////////////////////////////////////////////
-}
+};
