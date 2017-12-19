@@ -2,15 +2,15 @@
 module.exports = function authenticationTokenDecodeMiddlewareFactory(config, UserSchema, authenticationTokenGenerator){
     
 	/*
-		A good artcile Jem appreciated before creating these token middlewares:
+		A good article Jem appreciated before creating these token middlewares:
 		https://dev.to/neilmadden/7-best-practices-for-json-web-tokens
 	*/
 	
     // Requires
-    let jwt     = require('jsonwebtoken');
+    const jwt     = require('jsonwebtoken');
 	
 	// JOT token config
-	let tokenCfg = config.security.jot;
+	const tokenCfg = config.security.jot;
 
     return function authenticationTokenDecode(req, res, next){
     
@@ -47,7 +47,7 @@ module.exports = function authenticationTokenDecodeMiddlewareFactory(config, Use
 					// Add function to check presence of role
 					req.tokenHasRole = function(theRole){
 						return req.decodedToken.roles.indexOf(theRole) !== -1;
-					}
+					};
 
 					// Half life renewal
 					let renewIn = (decoded.exp - tokenCfg.renew) - (new Date().getTime() / 1000);
@@ -79,4 +79,4 @@ module.exports = function authenticationTokenDecodeMiddlewareFactory(config, Use
 		// No token provided
 		else next();
     };
-}
+};

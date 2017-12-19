@@ -2,11 +2,8 @@
 module.exports = function authenticationRouteFactory(authenticationHandler){
 
     // Requires
-    let express	= require('express');
-    let router = express.Router();
-
-    // Ensure the "engine" role is granted
-    //router.use(roleCheckMiddleware('admin'));
+    const express	= require('express');
+    const router = express.Router();
 
 	// Authentication endpoint
     router.get('/', (req, res) => { res.send("Klaatu barada nikto!") });
@@ -14,6 +11,5 @@ module.exports = function authenticationRouteFactory(authenticationHandler){
     // Authentication endpoint
     router.post('/', authenticationHandler);
 
-
     return router;
-}
+};

@@ -15,8 +15,8 @@ module.exports = function apiRouteFactory(
 	){
     
     // Requires
-    let express	= require('express');
-    let router	= express.Router();
+    const express	= require('express');
+    const router	= express.Router();
 
     // Route: API root
 
@@ -41,4 +41,4 @@ module.exports = function apiRouteFactory(
 	router.use('/users', userRoute);
 	
     return router;
-}
+};

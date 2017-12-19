@@ -4,11 +4,11 @@ module.exports = function routesFactory(
 		fourOhFourHandler
 	){
 
-    let express     = require('express');
-    let path        = require('path');
-	
+    const express     = require('express');
+    const path        = require('path')
+
 	function registerExternalRoutes(expressApp, externalRoutes){
-		for (var route of externalRoutes) {
+		for (let route of externalRoutes) {
 			expressApp.use(route.endpoint, route.router);
 		}
 	}
@@ -16,13 +16,12 @@ module.exports = function routesFactory(
     function configureRoutes(expressApp){
 
 		// Static content - should upgrade Trapezo to provide true server root
-		let pathToSite = path.join(__dirname, '..', '..', 'public', 'www');
+		let pathToSite = path.join(__dirname, '..', 'public', 'www');
 		expressApp.use(/*"/",*/express.static(pathToSite));
 
-		// Init the app
-		/*expressApp.get('/', (req, res) => {
-			res.send("Hello, curious one!");
-		});*/
+		expressApp.get('/', (req, res) => {
+			res.json({});
+		});
 		
 	    // API
 	    expressApp.use('/api', apiRoute);
@@ -35,4 +34,4 @@ module.exports = function routesFactory(
 		registerExternalRoutes	: registerExternalRoutes,
 		configureRoutes			: configureRoutes
 	};
-}
+};

@@ -7,14 +7,14 @@ module.exports = function authenticationTokenGeneratorFactory(config){
 	*/
 	
     // Requires
-    let jwt = require('jsonwebtoken');
+    const jwt = require('jsonwebtoken');
 	
 	// JOT token config
-	let tokenCfg = config.security.jot;
+	const tokenCfg = config.security.jot;
 
     return function authenticationTokenGenerator(_id, userName, roles){
 
-		let token = jwt.sign(
+		const token = jwt.sign(
 
 			// payload
 			{
@@ -41,4 +41,4 @@ module.exports = function authenticationTokenGeneratorFactory(config){
 		// let tokenClaims = new Buffer(token.split('.')[1], 'base64').toString();
 		return token;
     }
-}
+};

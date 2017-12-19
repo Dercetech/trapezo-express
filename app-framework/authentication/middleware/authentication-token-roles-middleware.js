@@ -1,5 +1,18 @@
 'use strict';
-module.exports = function authenticationTokenRoleCheckMiddlewareFactory(config){
+module.exports = function authenticationTokenRoleCheckMiddlewareFactory(){
+
+    // This middleware will prevent access to routes in case all required roles are not granted.
+
+    // Not to be mistaken with the req.tokenHasRole(role:string) added by the token-decode-middleware
+    // which should be used as part of the business logic implementation of handlers.
+
+    function requestedRolesProvided(requested, roles){
+        let matching = 0;
+        requested.forEach(function(role){
+            matching += roles.indexOf(role) >= 0 ? 1 : 0;
+        });
+        return requested.length === matching;
+    }
 
     return function authenticationTokenRoleCheck(expectedRoles){
 
@@ -10,14 +23,6 @@ module.exports = function authenticationTokenRoleCheckMiddlewareFactory(config){
             else{
                 throw "Roles can only be a String or an Array. Provided: " + expectedRoles;
             }
-        }
-
-        function requestedRolesProvided(requested, roles){
-            let matching = 0;
-            requested.forEach(function(role){
-                matching += roles.indexOf(role) >= 0 ? 1 : 0;
-            });
-            return requested.length === matching;
         }
 
         return function(req, res, next){
@@ -35,4 +40,4 @@ module.exports = function authenticationTokenRoleCheckMiddlewareFactory(config){
             }
         };
     };
-}
+};

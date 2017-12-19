@@ -18,4 +18,4 @@ module.exports = function authenticationTokenCheckMiddlewareFactory(config){
     return function authenticationTokenCheck(req, res, next){
         return (req.decodedToken && req.decodedToken.user) ? next() : res.sendStatus(401);
     };
-}
+};

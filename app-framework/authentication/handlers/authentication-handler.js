@@ -2,15 +2,9 @@
 module.exports = function authenticationHandlerFactory(config, UserSchema, authenticationTokenGenerator){
     
 	/*
-		A good artcile Jem appreciated before writing this:
+		A good article Jem appreciated before writing this:
 		https://dev.to/neilmadden/7-best-practices-for-json-web-tokens
 	*/
-	
-    // Requires
-    let jwt = require('jsonwebtoken');
-	
-	// JOT token config
-	let tokenCfg = config.security.jot;
 
     return function authenticationHandler(req, res){
 
@@ -44,4 +38,4 @@ module.exports = function authenticationHandlerFactory(config, UserSchema, authe
 			 }
 		});
     }
-}
+};

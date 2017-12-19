@@ -33,6 +33,12 @@ module.exports = function configureExpressFactory(config){
             +",Accept"
         );
 
+        // Allow headers access (needed for Angular 2+)
+        res.header("access-control-expose-headers",
+
+            "Authorization"
+        );
+
         // Allowed methods
         res.header('Access-Control-Allow-Methods',
 
