@@ -57,9 +57,9 @@ module.exports = function configFactory(){
     if(process.env.OPENSHIFT_DATA_DIR){
         dataFolder      = process.env.OPENSHIFT_DATA_DIR;
     }
-    
+
     // 4.2 Set folders
-    //let someFolder = path.join(dataFolder, "submissions");    
+    const uploadFolder	= path.join(dataFolder, "uploads");
 
 
     // Server configuration //////////////////
@@ -80,8 +80,9 @@ module.exports = function configFactory(){
 			
 		},
                 
-        "fs" : {
-			"dataFolder"	: dataFolder		// root data folder
+        "filesystem" : {
+			"root"		: dataFolder,
+			"uploads"	: uploadFolder
 		},
 		
 		"security" : {

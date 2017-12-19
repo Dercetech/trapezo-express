@@ -11,7 +11,10 @@ module.exports = function apiRouteFactory(
 		
 		// Routes
 		authenticationRoute,
-		userRoute
+		userRoute,
+
+        // Templates
+        genericUploadHandler
 	){
     
     // Requires
@@ -29,7 +32,11 @@ module.exports = function apiRouteFactory(
     // Route: authentication
 	router.use('/authenticate', authenticationRoute);
 	
-	
+
+	// Template: upload
+    router.use('/upload', genericUploadHandler);
+
+
     // Tokens are expected from here /////////
     router.use(authenticationTokenDecode);
 	
