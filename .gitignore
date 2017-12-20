@@ -10,3 +10,5 @@ node_modules
 npm-debug.log
 
 data
+public/www-dev/node_modules
+public/www-dev/dist
