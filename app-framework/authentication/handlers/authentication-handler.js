@@ -16,7 +16,7 @@ module.exports = function authenticationHandlerFactory(config, UserSchema, authe
         UserSchema.findOne({'user'  : userName}).select('_id user pwd roles').exec()
 		.then(aUser => {
 			user = aUser;
-            if(!user) throw {name: 404 };
+            if(!user) throw {name: 401 };		// you might return a 404 but that'd indicate the username is known or not.
 			else return user.comparePassword(req.body.pwd);
 		})
 		

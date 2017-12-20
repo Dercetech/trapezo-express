@@ -10,16 +10,10 @@ export class AuthAutoRedirectService implements CanActivate{
               @Inject(AuthService) private authService: AuthService){}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-
-    return this.authService.isAuthenticated()
-      .then( (authenticated: boolean) => {
-        if(authenticated){
-          this.router.navigate(['/', 'secure']);
-        }
-        else{
-          return true;
-        }
-    });
+      if (this.authService.isAuthenticated()) {
+        this.router.navigate(['/', 'secure']);
+        return false;
+      }
+      else return true;
   }
-
 }

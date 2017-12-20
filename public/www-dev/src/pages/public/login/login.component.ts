@@ -10,9 +10,12 @@ import {AuthService} from "../../../framework/authentication/services/auth-servi
 })
 export class LoginComponent implements OnInit {
 
+  loading:boolean = false;
+  error:string = null;
+
   loginForm = this._formBuilder.group({
-    email: ["", Validators.required],
-    password: ["", Validators.required],
+    username: ["groot", Validators.required],
+    password: ["groot", Validators.required],
     //agreeWithTerms: ["", Validators.required]
   });
 
@@ -22,4 +25,25 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
   }
 
+  onRegisterUser(){
+
+  }
+
+  onPasswordLost(){
+
+  }
+
+  onAuthenticate(){
+    this.loading = true;
+    this.authService.login(this.loginForm.value.username, this.loginForm.value.password).first().subscribe( (result:boolean) => {
+      this.loading = false;
+      if(!result){
+        this.error = 'wrong credentials';
+      }
+    },
+      (err) => {
+        this.loading = false;
+        this.error = 'error during authentication';
+      });
+  }
 }

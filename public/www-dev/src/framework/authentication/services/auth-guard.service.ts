@@ -2,12 +2,14 @@ import {Inject, Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs/Observable";
 import {AuthService} from "./auth-service";
+import {TokenService} from "./token-service";
 
 @Injectable()
 export class AuthGuardService implements CanActivate{
 
   constructor(private router: Router,
-              @Inject(AuthService) private authService: AuthService){
+              @Inject(AuthService) private authService: AuthService,
+              @Inject(TokenService) private tokenService: TokenService){
 
   }
 
@@ -15,42 +17,28 @@ export class AuthGuardService implements CanActivate{
 
     const roles = route.data["roles"] as Array<string>;
 
-    return this.authService.isAuthenticated()
-      .then( (authenticated: boolean) => {
+    if(this.authService.isAuthenticated()){
 
+      // Is there a role-based restriction?
+      if(roles && roles.length > 0){
 
-        // Is user authenticated?
-        if(authenticated){
+        const rolesPassed = this.tokenService.checkRoles(roles);
 
-          // Is there a role-based restriction?
-          if(roles && roles.length > 0){
-
-            const rolesPassed = this.authService.checkRoles(roles);
-
-            if(rolesPassed){
-              return true;
-            }
-            else{
-
-              // Is it a non-activated account?
-              if(!this.authService.checkRoles(['activated-user'])){
-                this.router.navigate(['/', 'secure', 'must-activate']);
-              }
-              else{
-                console.log('must implement "role missing" but unlikely in this app');
-                this.router.navigate(['/']);
-              }
-            }
-          }
-
-          // No, just need authentication
-          else return true;
+        if(rolesPassed){
+          return true;
         }
         else{
-          console.log('use is not authenticated');
-          this.router.navigate(['/']);
+          console.warn('User is missing grants for this route. Disable UI items according to his grants.');
+          return false;
         }
-    });
-  }
+      }
 
+      // No role requested, just need authentication.
+      else return true;
+    }
+
+    else{
+      this.router.navigate(['/']);
+    }
+  }
 }

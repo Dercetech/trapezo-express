@@ -9,4 +9,8 @@
   a{
     color: map-get($primary, default);
   }
+
+  .warn{
+    color: map-get($warn, default);
+  }
 }
