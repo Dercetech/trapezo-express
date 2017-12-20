@@ -77,11 +77,7 @@ export class AuthService {
           observer.next(true);
         },
         (err) => (err.status === 401) ? observer.next(false) : observer.error({}),
-        () => {
-          console.log('pipi');
-          observer.complete()
-        }
-      );
+        () => observer.complete() );
     });
   }
 
