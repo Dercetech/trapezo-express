@@ -4,9 +4,10 @@ module.exports = function userGetAllHandlerFactory(config, UserSchema){
     return function userGetAllHandler(req, res){
 
         let query = {};
-		let fields = "_id user";
+		let fields = "user";
 		
 		if(req.tokenHasRole("admin")){
+			fields += " _id";
 			fields += " roles";
 		}
 		else{
@@ -15,7 +16,7 @@ module.exports = function userGetAllHandlerFactory(config, UserSchema){
         
         UserSchema.find(query, fields).lean().exec()
 			.then( items => {
-				res.send(items);
+				res.send({ users: items });
 			})
 			.catch( err => res.status(500).send('Users could not be retrieved: ' + err));
 	}

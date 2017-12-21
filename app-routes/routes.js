@@ -16,10 +16,8 @@ module.exports = function routesFactory(
 
     function configureRoutes(expressApp){
 
-        // Static content - should upgrade Trapezo to provide true server root
-        const pathToSite = config.environment === 'prod' ?
-			path.join(__dirname, '..', 'public', 'www') :
-			path.join(__dirname, '..', 'public', 'www-dev', 'src');
+        // Static content - best handled by Trapezo UI!
+        const pathToSite = path.join(__dirname, '..', 'public', 'www');
 
         expressApp.use(/*"/",*/express.static(pathToSite));
 

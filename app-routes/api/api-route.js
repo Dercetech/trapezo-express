@@ -31,7 +31,6 @@ module.exports = function apiRouteFactory(
 	
     // Route: authentication
 	router.use('/authenticate', authenticationRoute);
-	
 
 	// Template: upload
     router.use('/upload', genericUploadHandler);
@@ -42,10 +41,10 @@ module.exports = function apiRouteFactory(
 	
     // Authentication required from here /////
     router.use(authenticationTokenCheck);
-	
-	
-    // Route: authentication
-	router.use('/users', userRoute);
-	
+
+    // User management
+    router.use('/users', userRoute);
+
+
     return router;
 };

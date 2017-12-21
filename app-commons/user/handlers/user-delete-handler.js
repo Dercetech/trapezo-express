@@ -31,4 +31,4 @@ module.exports = function userDeleteHandlerFactory(config, UserSchema){
 		
 		else return res.status(403).send('insufiscient clearance to delete a user');	// TODO Should store a tamper alert for this user
 	}
-}
+};
