@@ -4,6 +4,9 @@ module.exports = function configure(injector) {
 	// Token generation service
 	injector.register('authenticationTokenGenerator', require('./services/authentication-token-generator'));
 
+    // Route: Authentication
+    injector.register('authenticationRoute', require('./routes/authentication-route'));
+
 	// Handler: Authentication
 	injector.register('authenticationHandler', require('./handlers/authentication-handler'));
 	

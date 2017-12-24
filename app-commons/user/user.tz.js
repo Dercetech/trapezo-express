@@ -4,7 +4,10 @@ module.exports = function configure(injector) {
     // Schema: user
     injector.register('UserSchema', require('./user-schema'));
 
-	// Handler: get all
+    // Route: User management
+    injector.register('userRoute', require('./routes/user-route'));
+
+    // Handler: get all
 	injector.register('userGetAllHandler', require('./handlers/user-get-all-handler'));
 	
 	// Handler: get one
