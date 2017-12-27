@@ -2,7 +2,7 @@
 module.exports = function configure(injector) {
 
     // Schema: user
-    injector.register('UserSchema', require('./user-schema'));
+    injector.register('UserSchema', require('./models/user-schema'));
 
     // Route: User management
     injector.register('userRoute', require('./routes/user-route'));

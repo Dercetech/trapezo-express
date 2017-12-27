@@ -3,7 +3,7 @@ module.exports = function userGetOneHandlerFactory(config, UserSchema){
     
     return function userGetOneHandler(req, res){ 
 
-		let fields = "_id user";
+		let fields = "_id user displayName email";
 		let user = req.params.user;
 		
 		if(req.tokenHasRole("admin")){

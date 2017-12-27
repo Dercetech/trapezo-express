@@ -3,12 +3,12 @@ module.exports = function userUpdateHandlerFactory(config, UserSchema){
     
     return function userUpdateHandler(req, res){
 	
-		let user = req.params.user;
-		let updateStatements = {};
+		const user = req.params.user;
+		const updateStatements = {};
 		let fieldsToUpdateCount = 0;
-		
-		let adminOnlyFields = ["user", "roles"];
-		let allUsersFields = [];
+
+		const adminOnlyFields = ["roles"];
+		const allUsersFields = ["displayName", "email"];
 		
 		// Admins can update userName and roles
 		if(req.tokenHasRole("admin")){
@@ -16,7 +16,7 @@ module.exports = function userUpdateHandlerFactory(config, UserSchema){
 			if(req.body.user){
 				switch(req.body.user){
 					case "me" : return res.status(400).send("username 'me' is not valid");
-					case "groot" : return res.status(400).send("username 'groot' is not valid"); break;
+					//case "groot" : return res.status(400).send("username 'groot' is not valid"); break;
 					default : break;
 				}
 			}
@@ -49,10 +49,10 @@ module.exports = function userUpdateHandlerFactory(config, UserSchema){
 		}
 		
 		// Special treatement for passwords - the preSave hashing&co must run
-		if(req.body.pwd){
+		if(req.body.password){
 			UserSchema.findOne({user: user}).exec()
 			.then(theUser => {
-				theUser.pwd = req.body.pwd;
+				theUser.pwd = req.body.password;
 				return theUser.save()
 			})
 			.then( theUser => {

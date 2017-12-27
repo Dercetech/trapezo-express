@@ -3,8 +3,8 @@ module.exports = function userCreateHandlerFactory(config, UserSchema){
     
     return function userCreateHandler(req, res){
 	
-		if(!(req.body.user && req.body.pwd && req.body.roles)){
-			res.status(400).send("user, pwd & roles are required");
+		if(!(req.body.user && req.body.password && req.body.roles)){
+			res.status(400).send("user, password & roles are required");
 		}
 		else if(req.body.user === "me"){
 			res.status(400).send("username 'me' is not valid");
@@ -15,7 +15,9 @@ module.exports = function userCreateHandlerFactory(config, UserSchema){
 		else{
 			let newUser = new UserSchema();
 			newUser.user = req.body.user;
-			newUser.pwd = req.body.pwd;
+			newUser.displayName = req.body.displayName;
+			newUser.email = req.body.email;
+			newUser.pwd = req.body.password;
 			newUser.roles = req.body.roles;
 		
 			newUser.save()

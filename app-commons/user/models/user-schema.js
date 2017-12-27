@@ -11,7 +11,13 @@ module.exports = function userSchemaFactory(config, registerMongooseModel){
         
         // Username
         'user'  : { 'type' : String, 'required' : true, 'index' : { 'unique' : true }},
-        
+
+		// Displayname
+        'displayName'  : { 'type' : String },
+
+		// Email
+        'email'  : { 'type' : String },
+
         // Password (iterations:salt:hash)
         'pwd'   : { 'type' : String, 'required' : true, 'select' : false },
 
