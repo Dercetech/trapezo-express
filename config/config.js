@@ -13,6 +13,7 @@ module.exports = function configFactory(){
     
 	// Port
 	let port = process.env.PORT || 8086;
+	let portSSL = process.env.CFG_SSL;
 
 	// Address
 	let address = process.env.IP || "127.0.0.1";
@@ -72,7 +73,8 @@ module.exports = function configFactory(){
 	
         "server" : {
 			"port"      : port,
-			"address"   : address	
+			"portSSL"   : portSSL,
+			"address"   : address
 		},
         
         "database" : {

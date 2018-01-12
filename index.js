@@ -28,7 +28,10 @@
 require('trapezo').resolve(module, function(main){
 
     // Start server
-    main.start().then( (httpServer) => {
+    main.start().then( (servers) => {
+
+    	const httpServer = servers[0];
+    	const httpsServer = servers[1];
 		
 		// Get version from package.json
 		let version = process.env && process.env.npm_package_version;
@@ -41,6 +44,7 @@ require('trapezo').resolve(module, function(main){
 		if(process.env.NODE_ENV) console.log(`Environment: ${process.env.NODE_ENV}`)
 		
 		// Output API status
-	    console.log('API: ' + httpServer.address().address + ':' + httpServer.address().port);
+	    console.log('HTTP API  : ' + httpServer.address().address + ':' + httpServer.address().port);
+	    if(httpsServer) console.log('HTTPS API : ' + httpsServer.address().address + ':' + httpsServer.address().port);
     });
 });

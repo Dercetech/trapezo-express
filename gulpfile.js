@@ -12,6 +12,7 @@ gulp.task('default', () => {
 gulp.task('set-env:prod', () => {
     process.env.CFG_ENV = 'prod';
     process.env.CFG_GROOT = 'groot';
+    process.env.CFG_SSL = 8087;
     process.env.CFG_PWD = 'aProductionPasswordTocChange';
     process.env.CFG_MDB= 'mongodb://127.0.0.1:27017/my-app';
 });
@@ -19,6 +20,7 @@ gulp.task('set-env:prod', () => {
 gulp.task('set-env:dev', () => {
     process.env.CFG_ENV = 'dev';
     process.env.CFG_GROOT = 'groot';
+    process.env.CFG_SSL = 8087;
     process.env.CFG_PWD = 'CanIHazCheezburgarz';
     process.env.CFG_MDB= 'mongodb://127.0.0.1:27017/my-app';
 });
